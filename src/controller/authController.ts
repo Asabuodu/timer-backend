@@ -1,7 +1,7 @@
 // import { Request, Response } from "express";
 import { RequestHandler } from "express";
 import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import User from "../models/User";
 import dbConnect from "../lib/mongoose";
 
@@ -33,6 +33,37 @@ export const signup: RequestHandler = async (req, res) => {
   }
 };
 
+
+//signin controller
+
+
+// export const login: RequestHandler = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     await dbConnect();
+
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return; // ✅ just return here
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return;
+//     }
+
+//     // 🔐 TODO: create JWT token and send it here
+
+//     res.status(200).json({ message: "Login successful", user });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
 export const login: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -50,7 +81,24 @@ export const login: RequestHandler = async (req, res) => {
       return;
     }
 
-    res.status(200).json({ message: "Login successful", user });
+    // ✅ Create JWT token here
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET!, // make sure this is defined in your .env
+      { expiresIn: "7d" }
+    );
+    res.status(200).json({ message: "Login successful", user, token });
+
+    // ✅ Return the token to the frontend
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Internal Server Error" });

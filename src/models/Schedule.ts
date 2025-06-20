@@ -24,25 +24,3 @@ const ScheduleSchema = new mongoose.Schema(
 
 const ScheduleModel = mongoose.model("Schedule", ScheduleSchema);
 export default ScheduleModel;
-
-// export type ScheduleType = {
-//   _id: string;
-//   userId: string;
-//   title: string;
-//   categories: {
-//     id: number;
-//     name: string;
-//     duration: {
-//       hours: number;
-//       minutes: number;
-//       seconds: number;
-//     };
-//   }[];
-//   duration: {
-//     hours: number;
-//     minutes: number;
-//     seconds: number;
-//   };
-//   createdAt?: Date;
-//   updatedAt?: Date;
-// };
