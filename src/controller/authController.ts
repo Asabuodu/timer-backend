@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 import dbConnect from "../lib/mongoose";
+import sendEmail from "../utils/sendEmail";
 
 // Signup controller
 
@@ -33,35 +34,6 @@ export const signup: RequestHandler = async (req, res) => {
   }
 };
 
-
-//signin controller
-
-
-// export const login: RequestHandler = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     await dbConnect();
-
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       res.status(400).json({ error: "Invalid email or password" });
-//       return; // ✅ just return here
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       res.status(400).json({ error: "Invalid email or password" });
-//       return;
-//     }
-
-//     // 🔐 TODO: create JWT token and send it here
-
-//     res.status(200).json({ message: "Login successful", user });
-//   } catch (error) {
-//     console.error("Login error:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
 
 
 export const login: RequestHandler = async (req, res) => {
@@ -101,5 +73,38 @@ export const login: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
+export const forgotPassword: RequestHandler = async (req, res) => {
+  const { email } = req.body as { email: string };
+
+  try {
+    await dbConnect();
+
+    const user = await User.findOne({ email }); // ✅ fixed here
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+      expiresIn: "1h",
+    });
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Password Reset",
+      text: `Click the link to reset your password: ${resetLink}`,
+    });
+
+    res.status(200).json({ message: "Reset link sent" });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ message: "Error sending email", error: err });
   }
 };

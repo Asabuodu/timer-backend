@@ -18,7 +18,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.2",
-    "next-auth": "^4.24.11"
+    "next-auth": "^4.24.11",
+    "nodemailer": "^6.10.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
