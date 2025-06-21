@@ -81,13 +81,12 @@ export const login: RequestHandler = async (req, res) => {
       return;
     }
 
-    // ✅ Create JWT token here
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET!, // make sure this is defined in your .env
-      { expiresIn: "7d" }
-    );
-    res.status(200).json({ message: "Login successful", user, token });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+      expiresIn: "7d",
+    });
+
+    res.status(200).json({ message: "Login successful", user, token }); // ✅ include token
+
 
     // ✅ Return the token to the frontend
     res.status(200).json({

@@ -1,10 +1,14 @@
-// src/middleware/authMiddleware.ts
+
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+// Define what we expect in the decoded token
+interface JwtPayload {
+  id: string; // use 'id' if you signed it like jwt.sign({ id: user._id }, ...)
+}
 
-interface AuthenticatedRequest extends Request {
-  user?: any;
+export interface AuthenticatedRequest extends Request {
+  user?: JwtPayload;
 }
 
 export const authenticate = (
@@ -22,9 +26,10 @@ export const authenticate = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    req.user = decoded; // Attach the decoded user to request
-    next(); // ✅ proceed to the next middleware
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+
+    req.user = decoded;
+    next();
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });
   }

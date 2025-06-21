@@ -6,11 +6,18 @@ const TimeSchema = new mongoose.Schema({
   seconds: { type: Number, required: true },
 });
 
+// const CategorySchema = new mongoose.Schema({
+//   id: { type: String, required: true },
+//   name: { type: String, required: true },
+//   duration: { type: TimeSchema, required: true },
+// });
+
 const CategorySchema = new mongoose.Schema({
-  id: { type: Number, required: true },
+  id: { type: String, required: true }, // ✅ was Number, must be String
   name: { type: String, required: true },
   duration: { type: TimeSchema, required: true },
 });
+
 
 const ScheduleSchema = new mongoose.Schema(
   {
@@ -22,5 +29,7 @@ const ScheduleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const ScheduleModel = mongoose.model("Schedule", ScheduleSchema);
+// const ScheduleModel = mongoose.model("Schedule", ScheduleSchema);
+const ScheduleModel = mongoose.models.Schedule || mongoose.model("Schedule", ScheduleSchema);
+
 export default ScheduleModel;

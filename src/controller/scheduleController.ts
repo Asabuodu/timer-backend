@@ -30,29 +30,6 @@ export const getUserSchedules = async (
   }
 };
 
-// ✅ Create a new schedule
-// export const createSchedule = async (
-//   req: AuthRequest,
-//   res: Response
-// ): Promise<void> => {
-//   try {
-//     const userId = req.user?.id;
-
-//     if (!userId) {
-//       res.status(401).json({ message: "Unauthorized" });
-//       return;
-//     }
-
-//     const schedule = new ScheduleModel({ ...req.body, userId });
-//     await schedule.save();
-
-//     res.status(201).json(schedule);
-//   } catch (error) {
-//     res.status(500).json({ message: "Failed to create schedule", error });
-//   }
-// };
-
-
 
 export const createSchedule = async (
   req: AuthRequest,
@@ -87,6 +64,7 @@ export const createSchedule = async (
     console.error("❌ Failed to create schedule:", error);
     res.status(500).json({ message: "Failed to create schedule" });
   }
+  
 };
 
 
@@ -115,5 +93,57 @@ export const getScheduleById = async (
     res.status(200).json(schedule);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+// edit schedule api
+export const updateSchedule = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, duration, categories } = req.body;
+
+    const updated = await ScheduleModel.findByIdAndUpdate(
+      id,
+      {
+        title,
+        duration,
+        categories,
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      res.status(404).json({ message: "Schedule not found" });
+      return;
+    }
+
+    res.status(200).json(updated);
+    return;
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ message: "Failed to update schedule" });
+    return;
+  }
+};
+
+
+
+
+export const deleteSchedule = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const deleted = await ScheduleModel.findByIdAndDelete(id);
+
+    if (!deleted) {
+      res.status(404).json({ message: "Schedule not found" });
+      return;
+    }
+
+    res.status(200).json({ message: "Schedule deleted successfully" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
