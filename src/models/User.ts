@@ -6,6 +6,8 @@ const userSchema = new Schema({
   username: { type: String, required: true },
   email:    { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Number },
 });
 
 // Avoid model overwrite in dev
@@ -20,4 +22,9 @@ export type UserType = {
   password: string;
   createdAt?: Date;
   updatedAt?: Date;
+  resetToken?: string;
+resetTokenExpiry?: number;
+
+  
 };
+

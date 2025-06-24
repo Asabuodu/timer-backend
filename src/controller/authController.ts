@@ -1,13 +1,275 @@
+// // import { Request, Response } from "express";
+// import { RequestHandler } from "express";
+// import bcrypt from "bcryptjs";
+// import jwt from "jsonwebtoken";
+// import User from "../models/User";
+// import dbConnect from "../lib/mongoose";
+// import sendEmail from "../utils/sendEmail";
+// import crypto from "crypto";
+
+// // Signup controller
+
+// export const signup: RequestHandler = async (req, res) => {
+//   try {
+//     const { username, email, password } = req.body;
+//     if (!username || !email || !password || password.length < 6) {
+//       res.status(400).json({ error: "All fields required. Password must be 6+ chars." });
+//       return;
+//     }
+
+//     await dbConnect();
+
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       res.status(400).json({ error: "Email already registered" });
+//       return;
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     await User.create({ username, email, password: hashedPassword });
+
+//     res.status(201).json({ message: "User created successfully" });
+//   } catch (error) {
+//     console.error("Signup error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
+
+// export const login: RequestHandler = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     await dbConnect();
+
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return;
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return;
+//     }
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+//       expiresIn: "7d",
+//     });
+
+//     res.status(200).json({ message: "Login successful", user, token }); // ✅ include token
+
+
+//     // ✅ Return the token to the frontend
+//     res.status(200).json({
+//       message: "Login successful",
+//       token,
+//       user: {
+//         id: user._id,
+//         username: user.username,
+//         email: user.email,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
+
+
+
+
+// import { Request, Response, RequestHandler } from "express";
+// import bcrypt from "bcryptjs";
+// import jwt from "jsonwebtoken";
+// import User from "../models/User";
+// import dbConnect from "../lib/mongoose";
+// import sendEmail from "../utils/sendEmail";
+
+// // === Signup Controller ===
+// export const signup: RequestHandler = async (req, res) => {
+//   try {
+//     const { username, email, password } = req.body;
+//     if (!username || !email || !password || password.length < 6) {
+//       res.status(400).json({ error: "All fields required. Password must be 6+ chars." });
+//       return;
+//     }
+
+//     await dbConnect();
+
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       res.status(400).json({ error: "Email already registered" });
+//       return;
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     await User.create({ username, email, password: hashedPassword });
+
+//     res.status(201).json({ message: "User created successfully" });
+//   } catch (error) {
+//     console.error("Signup error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+// // === Login Controller ===
+// export const login: RequestHandler = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     await dbConnect();
+
+//     const user = await User.findOne({ email });
+//     if (!user || !(await bcrypt.compare(password, user.password))) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return;
+//     }
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+
+//     res.status(200).json({
+//       message: "Login successful",
+//       token,
+//       user: {
+//         id: user._id,
+//         username: user.username,
+//         email: user.email,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+// // === Forgot Password: Send Token ===
+// // export const forgotPassword: RequestHandler = async (req, res) => {
+// //   const { email } = req.body;
+
+// //   try {
+// //     await dbConnect();
+// //     const user = await User.findOne({ email });
+// //     if (!user) return res.status(404).json({ message: "User not found" });
+
+// //     const token = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit numeric
+// //     const hashedToken = await bcrypt.hash(token, 10);
+
+// //     user.resetToken = hashedToken;
+// //     user.resetTokenExpiry = Date.now() + 15 * 60 * 1000;
+// //     await user.save();
+
+// //     await sendEmail({
+// //       to: user.email,
+// //       subject: "Password Reset Token",
+// //       text: `Your password reset token is: ${token}`,
+// //     });
+
+// //     res.status(200).json({ message: "Token sent to your email" });
+// //   } catch (err) {
+// //     console.error("Forgot password error:", err);
+// //     res.status(500).json({ message: "Server error" });
+// //   }
+// // };
+
+// export const forgotPassword: RequestHandler = async (req, res) => {
+//   const { email } = req.body;
+
+//   try {
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       res.status(404).json({ message: "User not found" });
+//       return;
+//     }
+
+//     const token = Math.floor(100000 + Math.random() * 900000).toString();
+//     const hashedToken = await bcrypt.hash(token, 10);
+
+//     user.resetToken = hashedToken;
+//     user.resetTokenExpiry = Date.now() + 15 * 60 * 1000;
+//     await user.save();
+
+//     await sendEmail({
+//       to: email,
+//       subject: "Password Reset Token",
+//       text: `Your password reset token is: ${token}`,
+//     });
+
+//     res.status(200).json({ message: "Token sent to your email" }); // ✅ no return here
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
+// // === Verify Token ===
+// export const verifyResetToken: RequestHandler = async (req, res) => {
+//   const { email, token } = req.body;
+
+//   try {
+//     await dbConnect();
+//     const user = await User.findOne({ email });
+//     if (!user || !user.resetToken || !user.resetTokenExpiry) {
+//       res.status(400).json({ message: "Invalid or expired token" });
+//       return;
+//     }
+
+//     const isValid = await bcrypt.compare(token, user.resetToken);
+//     if (!isValid || user.resetTokenExpiry < Date.now()) {
+//       res.status(400).json({ message: "Invalid or expired token" });
+//       return;
+//     }
+
+//     // Optional: Issue short-lived JWT for security
+//     const resetJwt = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, { expiresIn: "15m" });
+
+//     res.status(200).json({ message: "Token verified", token: resetJwt });
+//   } catch (err) {
+//     console.error("Verify token error:", err);
+//     res.status(500).json({ message: "Verification failed" });
+//   }
+// };
+
+// // === Reset Password ===
+// export const resetPassword: RequestHandler = async (req, res) => {
+//   const { token, newPassword } = req.body;
+
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+//     await dbConnect();
+
+//     const user = await User.findById(decoded.id);
+//     if (!user) return res.status(404).json({ message: "User not found" });
+
+
+//     const hashed = await bcrypt.hash(newPassword, 10);
+//     user.password = hashed;
+//     user.resetToken = undefined;
+//     user.resetTokenExpiry = undefined;
+
+//     await user.save();
+//     res.status(200).json({ message: "Password reset successful" });
+//   } catch (err) {
+//     console.error("Reset password error:", err);
+//     res.status(400).json({ message: "Invalid or expired token" });
+//   }
+// };
+
+
+
 // import { Request, Response } from "express";
-import { RequestHandler } from "express";
+import { RequestHandler, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 import dbConnect from "../lib/mongoose";
 import sendEmail from "../utils/sendEmail";
+import crypto from "crypto";
 
 // Signup controller
-
 export const signup: RequestHandler = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -34,8 +296,7 @@ export const signup: RequestHandler = async (req, res) => {
   }
 };
 
-
-
+// Login controller
 export const login: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -57,10 +318,6 @@ export const login: RequestHandler = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.status(200).json({ message: "Login successful", user, token }); // ✅ include token
-
-
-    // ✅ Return the token to the frontend
     res.status(200).json({
       message: "Login successful",
       token,
@@ -76,35 +333,124 @@ export const login: RequestHandler = async (req, res) => {
   }
 };
 
-
-
+// Forgot password: Send token to user's email
 export const forgotPassword: RequestHandler = async (req, res) => {
-  const { email } = req.body as { email: string };
+  const { email } = req.body;
 
   try {
-    await dbConnect();
-
-    const user = await User.findOne({ email }); // ✅ fixed here
+    const user = await User.findOne({ email });
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });
+    const token = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedToken = await bcrypt.hash(token, 10);
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+    user.resetToken = hashedToken;
+    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000;
+    await user.save();
 
     await sendEmail({
-      to: user.email,
-      subject: "Password Reset",
-      text: `Click the link to reset your password: ${resetLink}`,
+      to: email,
+      subject: "Password Reset Token",
+      text: `Your password reset token is: ${token}`,
     });
 
-    res.status(200).json({ message: "Reset link sent" });
+    res.status(200).json({ message: "Token sent to your email" });
   } catch (err) {
-    console.error("Forgot password error:", err);
-    res.status(500).json({ message: "Error sending email", error: err });
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
+};
+
+
+// Verify reset token
+export const forgotPasswordToken: RequestHandler = async (req, res) => {
+  const { email } = req.body;
+  await dbConnect();
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  const token = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiry = Date.now() + 1000 * 60 * 10;
+
+  user.resetToken = token;
+  user.resetTokenExpiry = expiry;
+  await user.save();
+
+  await sendEmail({
+    to: user.email,
+    subject: "Reset Code",
+    text: `Your reset code is: ${token}`,
+  });
+
+  res.status(200).json({ message: "Reset token sent to email" });
+};
+
+
+// Verify reset token
+export const verifyResetToken: RequestHandler = async (req, res) => {
+  const { email, token } = req.body;
+  await dbConnect();
+
+  const user = await User.findOne({ email });
+  if (!user || user.resetToken !== token || Date.now() > user.resetTokenExpiry) {
+    res.status(400).json({ error: "Invalid or expired token" });
+    return;
+  }
+
+  res.status(200).json({ message: "Token verified" });
+};
+
+export const verifyToken: RequestHandler = async (req, res) => {
+  const { email, token } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || !user.resetToken || !user.resetTokenExpiry) {
+      res.status(400).json({ message: "Invalid or expired token" });
+      return;
+    }
+
+    const isValid = await bcrypt.compare(token, user.resetToken);
+    if (!isValid || user.resetTokenExpiry < Date.now()) {
+      res.status(400).json({ message: "Invalid or expired token" });
+      return;
+    }
+
+    const resetJwt = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+      expiresIn: "15m",
+    });
+
+    res.status(200).json({ message: "Token verified", token: resetJwt });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Verification failed" });
+  }
+};
+
+
+// Reset password
+export const resetPassword: RequestHandler = async (req, res) => {
+  const { email, newPassword } = req.body;
+  await dbConnect();
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  user.password = hashed;
+  user.resetToken = undefined;
+  user.resetTokenExpiry = undefined;
+  await user.save();
+
+  res.status(200).json({ message: "Password reset successful" });
 };
