@@ -119,7 +119,7 @@ export const forgotPasswordToken: RequestHandler = async (req, res) => {
   }
 
   const token = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiry = Date.now() + 1000 * 60 * 10;
+  const expiry = Date.now() + 1000 * 60 * 3;
 
   user.resetToken = token;
   user.resetTokenExpiry = expiry;
@@ -128,7 +128,7 @@ export const forgotPasswordToken: RequestHandler = async (req, res) => {
   await sendEmail({
     to: user.email,
     subject: "Reset Code",
-    text: `Your reset code is: ${token}`,
+    text: `Your reset code is: ${token}, This code is valid for 3 minutes.`,
   });
 
   res.status(200).json({ message: "Reset token sent to email" });
