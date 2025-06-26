@@ -166,7 +166,7 @@ export const verifyToken: RequestHandler = async (req, res) => {
     }
 
     const resetJwt = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
-      expiresIn: "15m",
+      expiresIn: "3m",
     });
 
     res.status(200).json({ message: "Token verified", token: resetJwt });
