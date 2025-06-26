@@ -3,7 +3,7 @@ import { signup,
       login,
      forgotPassword,
      verifyToken,
-  resetPassword 
+     resetPassword 
 } from "../../controller/authController";
 
 

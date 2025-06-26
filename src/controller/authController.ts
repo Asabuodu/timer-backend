@@ -176,23 +176,31 @@ export const verifyToken: RequestHandler = async (req, res) => {
   }
 };
 
-
-// Reset password
+// In authController.ts
 export const resetPassword: RequestHandler = async (req, res) => {
-  const { email, newPassword } = req.body;
-  await dbConnect();
+  const { password, token } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    res.status(404).json({ error: "User not found" });
-    return;
+  try {
+    await dbConnect();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    user.password = hashed;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "Invalid or expired reset token" });
   }
-
-  const hashed = await bcrypt.hash(newPassword, 10);
-  user.password = hashed;
-  user.resetToken = undefined;
-  user.resetTokenExpiry = undefined;
-  await user.save();
-
-  res.status(200).json({ message: "Password reset successful" });
 };
+
