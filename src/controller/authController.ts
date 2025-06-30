@@ -38,9 +38,46 @@ export const signup: RequestHandler = async (req, res) => {
 };
 
 // Login controller
+// export const login: RequestHandler = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     await dbConnect();
+
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return;
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       res.status(400).json({ error: "Invalid email or password" });
+//       return;
+//     }
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+//       expiresIn: "1d",
+//     });
+
+//     res.status(200).json({
+//       message: "Login successful",
+//       token,
+//       user: {
+//         id: user._id,
+//         username: user.username,
+//         email: user.email,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 export const login: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     await dbConnect();
 
     const user = await User.findOne({ email });
@@ -51,26 +88,30 @@ export const login: RequestHandler = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      res.status(400).json({ error: "Invalid email or password" });
-      return;
+     res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
-      expiresIn: "7d",
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not defined");
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
     });
 
-    res.status(200).json({
-      message: "Login successful",
+     res.status(200).json({
       token,
       user: {
         id: user._id,
-        username: user.username,
+        name: user.name,
         email: user.email,
       },
     });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return;
+  } catch (err) {
+    console.error("Login error:", err);
+   res.status(500).json({ error: "Internal server error" });
+   return;
   }
 };
 
