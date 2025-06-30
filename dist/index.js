@@ -12,7 +12,7 @@ const schedules_1 = __importDefault(require("./api/schedules"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.CLIENT_URL || "https://timer-frontend-iota.vercel.app",
     credentials: true,
 }));
 app.use(express_1.default.json());
