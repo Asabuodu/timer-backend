@@ -14,9 +14,9 @@ const app = express();
 app.use(
   cors({
   origin: [
-    "http://localhost:3000", 
+   // "http://localhost:3000", 
     "https://timer-frontend-iota.vercel.app"
-]
+],
     credentials: true,
   })
 );
